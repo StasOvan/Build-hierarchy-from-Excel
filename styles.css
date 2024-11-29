@@ -1,0 +1,177 @@
+body {
+    font-size: 20px;
+    font-family: system-ui;
+    margin: 0;
+    padding: 0;
+}
+.header {
+    background-color: #f3f3f3;
+    padding: 10px;
+    border-bottom: 1px solid #000;
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    
+}
+#textInput {
+    height: 28px;
+    font-size: 16px;
+    padding: 0 9px;
+    border: 1px solid #c3c7f9;
+}
+.header-search {
+    background-color: #f3f3f3;
+    margin: 10px 0 0px 0;
+    padding: 0 0 6px 0;
+    text-align: left;
+}
+.header-search button {
+    background-color: #4d01fd;
+    color: #ffffff;
+    border: 0;
+    height: 27px;
+    cursor: pointer;
+}
+.content {
+    margin: 115px 0 0 0;
+    white-space: nowrap;
+    padding: 0;
+   /* width: 97%;*/
+}
+.content button {
+    margin: 3px 0px 0 10px;
+    font-size: 13px;
+    padding: 2px 10px 2px 10px;
+    border: 1px solid #999;
+    color: #707070;
+    cursor: pointer;
+    background-color: #e8deff;
+    border-radius: 12px;
+}
+.background-image {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 400px;
+    height: 400px;
+    z-index: -1;
+    background-image: url(back.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+i {
+    margin-left: 10px;
+    color: #000;
+    font-weight: 600;
+}
+ul {
+    list-style-type: none; /* Убираем стандартные маркеры списка */
+    padding-left: 20px; /* Отступ для вложенных списков */
+    position: relative;
+    width: 97% !important;
+}
+li {
+    position: relative; /* Для позиционирования линий */
+    padding-left: 20px; /* Отступ для текста узла */
+    background-color: rgba(117, 190, 218, .07);
+    width: 98%;
+    padding: 0;
+}
+.toggle {
+    display: flex; /* Используем flex для выравнивания */
+    align-items: center; /* Центрируем по вертикали */
+    position: relative; /* Для позиционирования линии */
+    color: #444;
+    cursor: default;
+    width: fit-content;
+}
+.toggle:hover {
+    background-color: aliceblue;
+}
+.toggle-symbol {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    border: 1px solid red;
+    color: red;
+    margin-right: 5px;
+    font-weight: bold;
+    font-size: 16px;
+    position: relative;
+    cursor: pointer;
+    padding: 0px 3px 3px 3px;
+}
+.toggle-without-symbol {
+    margin-left: 34px;
+}
+.toggle-symbol:before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 20px; /* Начальная позиция линии */
+    width: 1px;
+    height: 20px; /* Длина линии */
+    background: red; /* Цвет соединительной линии */
+    transform: translateX(-50%);
+    display: none; /* Скрываем по умолчанию */
+}
+li > .toggle:hover .toggle-symbol:before {
+    display: none; /* Показываем линию при наведении */
+}
+li > ul {
+    padding-left: 20px; /* Отступ для вложенных узлов */
+}
+li > ul:before {
+    content: '';
+    position: absolute;
+    left: 14px; /* Начальная позиция линии */
+    top: 0px; /* Высота линии */
+    width: 1px;
+    height: 98%; /* Длина линии до конца дочерних узлов */
+    background: red; /* Цвет соединительной линии */
+}
+p {
+    margin: 0 0 0 10px;
+    padding: 0;
+}
+.copy-button {
+    margin: 3px 0px 0 20px;
+    font-size: 13px;
+    padding: 0 10px 2px 10px;
+    border: 1px solid #999;
+    color: #999;
+    cursor: pointer;
+    background-color: #fff;
+    border-radius: 12px;
+}
+.copy-button:hover {
+    color: #000;
+    background-color: #f2fff2;
+}
+.scrollToTop {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none; /* Скрываем кнопку по умолчанию */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s;
+    z-index: 100;
+}
+.scrollToTop:hover {
+    background-color: #0056b3;
+}
