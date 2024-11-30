@@ -1,60 +1,6 @@
 <?php
 require 'vendor/autoload.php';
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
-
-function readExcel($filePath) {
-    $spreadsheet = IOFactory::load($filePath);
-    $data = $spreadsheet->getActiveSheet()->toArray();
-    return $data;
-}
-
-function buildTree(array $elements, $parentId = 0) {
-    $branch = [];
-
-    foreach ($elements as $element) {
-        if ($element[1] == $parentId) { // Если родитель совпадает
-            $children = buildTree($elements, $element[0]);
-            $branch[] = [
-                'id' => $element[0],
-                'parent' => $element[1],
-                'text' => $element[2],
-                'children' => $children // Добавляем детей к элементу
-            ];
-        }
-    }
-
-    return $branch;
-}
-
-function displayTree(array $tree, $searchText = '') {
-    echo '<ul>';
-    foreach ($tree as $node) {
-        if ($searchText == '') {
-            echo '<li>';
-            echo '<span class="toggle" onclick="toggle(this)">';
-            if (!empty($node['children'])) {
-                echo '<span class="toggle-symbol">+</span>'; // Символ +
-            } else {
-                echo '<span class="toggle-without-symbol"></span>'; // отступ, если нет детей
-            }
-            $text1 = htmlspecialchars($node['id']) . ' - ' . '<i>' . htmlspecialchars($node['text']) . '</i>';
-            $text2 = htmlspecialchars($node['id']); // . ' - ' . htmlspecialchars($node['text']);
-            echo $text1 . "<span class='copy-button' onclick=\"copyToClipboard('{$text2}'); event.stopPropagation();\">копировать</span>
-            ";
-            echo '</span>';
-            if (!empty($node['children'])) {
-                echo '<ul style="display:none;">'; 
-                displayTree($node['children']); // Рекурсивно отображаем детей
-                echo '</ul>';
-            }
-            echo '</li>';
-        } 
-    }
-    echo '</ul>';
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -91,11 +37,10 @@ function displayTree(array $tree, $searchText = '') {
     <div class="header-main">
         <div style="text-align: center;">
             <!--button id="showLine" onclick="showLine">Линии</button-->
-            <button id="showLine" onclick="setStyle(300)">Режим 1</button>
-            <button id="hideLine" onclick="setStyle(400)">Режим 2</button>
-            <button id="hideLine" onclick="setStyle(500)">Режим 3</button>
+            <button id="showLine">Скрыть линии</button>
+            <button id="showCopy">Скрыть кнопки "Копировать"</button>
+            <button id="showGroup">Скрыть кнопки по группам</button>
         </div>
-
         <form action="" method="post" enctype="multipart/form-data">
             <input type="file" name="file" accept=".xlsx" required>
             <button style="
@@ -126,7 +71,44 @@ function displayTree(array $tree, $searchText = '') {
         </button>
     </div>    
 </div>
+
 <script>
+
+    const style = document.createElement('style');
+    style.textContent = `ul:before {content: none !important;}`;
+    document.getElementById('showLine').addEventListener('click', () => {
+        if (document.getElementById('showLine').innerText == "Показать линии") {
+            document.getElementById('showLine').innerText = "Скрыть линии";
+            if (document.head.contains(style)) document.head.removeChild(style); // Показать :before
+        } else {
+            document.getElementById('showLine').innerText = "Показать линии";
+            document.head.appendChild(style); // Скрыть :before
+        }    
+    });
+    
+    document.getElementById('showCopy').addEventListener('click', () => {
+        const buttons = document.querySelectorAll('.copy-button');
+        if (document.getElementById('showCopy').innerText == 'Скрыть кнопки "Копировать"') {
+            document.getElementById('showCopy').innerText = 'Показать кнопки "Копировать"';
+            buttons.forEach(button => { button.style.display = 'none';});
+        } else {
+            document.getElementById('showCopy').innerText = 'Скрыть кнопки "Копировать"';
+            buttons.forEach(button => { button.style.display = 'block';});
+        }
+    });
+
+    document.getElementById('showGroup').addEventListener('click', () => {
+        const toggles = document.querySelectorAll('.toggle');
+        if (document.getElementById('showGroup').innerText == 'Скрыть кнопки по группам') {
+            toggles.forEach(toggle => { if (toggle.getElementsByTagName("button")[0]) toggle.getElementsByTagName("button")[0].style.display = "none"; });
+            document.getElementById('showGroup').innerText = 'Показать кнопки по группам';
+        } else {
+            toggles.forEach(toggle => { if (toggle.getElementsByTagName("button")[0]) toggle.getElementsByTagName("button")[0].style.display = "block"; });
+            document.getElementById('showGroup').innerText = 'Скрыть кнопки по группам';
+        }
+    });
+
+
     document.getElementById('searchInput').addEventListener('input', function() {
         const searchValue = this.value.trim().toLowerCase(); // Убираем пробелы и переводим в нижний регистр
         if (searchValue == '') {
@@ -202,39 +184,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
 <script>
-    const style = document.createElement('style');
-    style.textContent = `ul:before {content: none !important;}`;
-
-    document.getElementById('hideLine').addEventListener('click', () => {
-        document.head.appendChild(style); // Скрыть :before
-    });
-    document.getElementById('showLine').addEventListener('click', () => {
-        if (document.head.contains(style)) {
-            document.head.removeChild(style); // Показать :before
-        }
-    });
-    
-
-    function setStyle(weight) {
-        
-        const elements = document.querySelectorAll('i');
-        const buttons = document.querySelectorAll('.copy-button');
-        
-        if (weight == 300) 
-            buttons.forEach(button => { button.style.display = 'none';});
-        if (weight == 400) 
-            buttons.forEach(button => { button.style.display = 'none'; });
-        if (weight == 500) 
-            buttons.forEach(button => { button.style.display = 'block';});
-
-        elements.forEach(element => {
-            element.style.fontWeight = weight;
-        });
-    }
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            showNotification('Скопировано в буфер обмена: ' + text);
+            showNotification(text);
         }).catch(err => {
             showNotification('Ошибка при копировании: ' + err);
             console.error('Ошибка при копировании: ', err);
@@ -243,18 +196,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     function showNotification(message) {
         const notification = document.createElement('div');
-        notification.innerText = message;
+        notification.innerHTML = '<span style="font-size: 12px;">Скопировано в буфер обмена:</span><br>' + message;
         notification.style.position = 'fixed';
         notification.style.top = '100px';
         notification.style.left = '50%';
         notification.style.transform = 'translateX(-50%)';
         notification.style.backgroundColor = '#FFF';
         notification.style.color = 'green';
-        notification.style.padding = '10px 20px';
+        notification.style.padding = '0px 20px 5px 20px';
         notification.style.borderRadius = '5px';
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.5s';
+        notification.style.opacity = '1';
+        notification.style.transition = 'opacity 1.7s';
         notification.style.boxShadow = '0px 3px 5px 0px #a9a9a9';
+        notification.style.fontSize = '20px';
+        notification.style.textAlign = 'center';
+        notification.style.zIndex = '1000';
+        
         document.body.appendChild(notification);
 
         // Плавное появление
@@ -402,6 +359,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 </script>
 
+<?php
+
+function readExcel($filePath) {
+    $spreadsheet = IOFactory::load($filePath);
+    $data = $spreadsheet->getActiveSheet()->toArray();
+    return $data;
+}
+
+function buildTree(array $elements, $parentId = 0) {
+    $branch = [];
+
+    foreach ($elements as $element) {
+        if ($element[1] == $parentId) { // Если родитель совпадает
+            $children = buildTree($elements, $element[0]);
+            $branch[] = [
+                'id' => $element[0],
+                'parent' => $element[1],
+                'text' => $element[2],
+                'children' => $children // Добавляем детей к элементу
+            ];
+        }
+    }
+
+    return $branch;
+}
+
+function displayTree(array $tree, $searchText = '') {
+    echo '<ul>';
+    foreach ($tree as $node) {
+        if ($searchText == '') {
+            echo '<li>';
+            echo '<span class="toggle" onclick="toggle(this)">';
+            if (!empty($node['children'])) {
+                echo '<span class="toggle-symbol">+</span>'; // Символ +
+            } else {
+                echo '<span class="toggle-without-symbol"></span>'; // отступ, если нет детей
+            }
+            $text1 = htmlspecialchars($node['id']) . ' - ' . '<i>' . htmlspecialchars($node['text']) . '</i>';
+            $text2 = htmlspecialchars($node['id']); // . ' - ' . htmlspecialchars($node['text']);
+            echo $text1 . "<span class='copy-button' onclick=\"copyToClipboard('{$text2}'); event.stopPropagation();\">копировать</span>
+            ";
+            echo '</span>';
+            if (!empty($node['children'])) {
+                echo '<ul style="display:none;">'; 
+                displayTree($node['children']); // Рекурсивно отображаем детей
+                echo '</ul>';
+            }
+            echo '</li>';
+        } 
+    }
+    echo '</ul>';
+}
+
+?>
 
 </body>
 </html>
